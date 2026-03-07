@@ -26,3 +26,7 @@
 
 - [ ] 5.1 Wire up `src/lib.rs` to re-export `Alerter`, `AlerterResponse`, `AlerterError`, and any supporting types
 - [ ] 5.2 Add basic integration test that verifies the binary can be extracted and `--help` can be invoked successfully
+
+## 6. Documentation
+
+- [ ] 6.1 Create README.md with project overview, usage examples, API reference, build requirements (Swift toolchain), and macOS version compatibility
