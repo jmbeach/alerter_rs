@@ -1,0 +1,4 @@
+[submodule "alerter"]
+	path = alerter
+	url = https://github.com/vjeantet/alerter.git
+	branch = v26.5
