@@ -1,6 +1,7 @@
 use crate::binary::extract_binary;
 use crate::error::AlerterError;
 use crate::response::AlerterResponse;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub struct Alerter {
@@ -21,6 +22,28 @@ pub struct Alerter {
     delay: Option<u32>,
     at: Option<String>,
     ignore_dnd: bool,
+    binary_path: Option<PathBuf>,
+}
+
+fn resolve_binary(override_path: Option<&Path>) -> Result<PathBuf, AlerterError> {
+    match override_path {
+        Some(p) => Ok(p.to_path_buf()),
+        None => extract_binary().map_err(|e| AlerterError::BinaryExtraction(e.to_string())),
+    }
+}
+
+fn run_alerter(binary: &Path, args: &[&str]) -> Result<std::process::Output, AlerterError> {
+    let output = Command::new(binary)
+        .args(args)
+        .output()
+        .map_err(|e| AlerterError::ProcessSpawn(e.to_string()))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+        return Err(AlerterError::Runtime(stderr));
+    }
+
+    Ok(output)
 }
 
 impl Alerter {
@@ -43,7 +66,13 @@ impl Alerter {
             delay: None,
             at: None,
             ignore_dnd: false,
+            binary_path: None,
         }
+    }
+
+    pub fn binary_path(&mut self, path: impl Into<PathBuf>) -> &mut Self {
+        self.binary_path = Some(path.into());
+        self
     }
 
     pub fn title(&mut self, title: &str) -> &mut Self {
@@ -196,14 +225,11 @@ impl Alerter {
     }
 
     pub fn send(&self) -> Result<AlerterResponse, AlerterError> {
-        let binary_path =
-            extract_binary().map_err(|e| AlerterError::BinaryExtraction(e.to_string()))?;
+        let binary = resolve_binary(self.binary_path.as_deref())?;
+        let args: Vec<String> = self.build_args();
+        let arg_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
 
-        let output = Command::new(&binary_path)
-            .args(&self.build_args())
-            .output()
-            .map_err(|e| AlerterError::ProcessSpawn(e.to_string()))?;
-
+        let output = run_alerter(&binary, &arg_refs)?;
         let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
         if self.json {
@@ -214,26 +240,22 @@ impl Alerter {
     }
 
     pub fn remove(group_id: &str) -> Result<(), AlerterError> {
-        let binary_path =
-            extract_binary().map_err(|e| AlerterError::BinaryExtraction(e.to_string()))?;
+        Self::remove_with_binary(group_id, None)
+    }
 
-        Command::new(&binary_path)
-            .args(["--remove", group_id])
-            .output()
-            .map_err(|e| AlerterError::ProcessSpawn(e.to_string()))?;
-
+    pub fn remove_with_binary(group_id: &str, binary: Option<&Path>) -> Result<(), AlerterError> {
+        let binary = resolve_binary(binary)?;
+        run_alerter(&binary, &["--remove", group_id])?;
         Ok(())
     }
 
     pub fn list(group_id: &str) -> Result<String, AlerterError> {
-        let binary_path =
-            extract_binary().map_err(|e| AlerterError::BinaryExtraction(e.to_string()))?;
+        Self::list_with_binary(group_id, None)
+    }
 
-        let output = Command::new(&binary_path)
-            .args(["--list", group_id])
-            .output()
-            .map_err(|e| AlerterError::ProcessSpawn(e.to_string()))?;
-
+    pub fn list_with_binary(group_id: &str, binary: Option<&Path>) -> Result<String, AlerterError> {
+        let binary = resolve_binary(binary)?;
+        let output = run_alerter(&binary, &["--list", group_id])?;
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
     }
 }

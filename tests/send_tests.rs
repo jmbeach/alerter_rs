@@ -1,17 +1,41 @@
 use alerter_rs::{Alerter, AlerterError, AlerterResponse};
+use std::path::PathBuf;
+
+fn mock_alerter() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/mock_alerter.sh")
+}
 
 #[test]
 fn send_returns_result() {
-    // send() should return Result<AlerterResponse, AlerterError>
-    let result: Result<AlerterResponse, AlerterError> = Alerter::new("test message").send();
-    // We don't assert success here — just that the types compile
-    let _ = result;
+    let result: Result<AlerterResponse, AlerterError> = Alerter::new("test message")
+        .binary_path(mock_alerter())
+        .send();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn send_with_mock_returns_plain_text_response() {
+    let response = Alerter::new("test message")
+        .binary_path(mock_alerter())
+        .send()
+        .expect("send should succeed with mock");
+    assert_eq!(response.activation_type, "@CONTENTCLICKED");
+    assert_eq!(response.activation_value, None);
+}
+
+#[test]
+fn send_with_mock_json_returns_json_response() {
+    let response = Alerter::new("test message")
+        .binary_path(mock_alerter())
+        .json(true)
+        .send()
+        .expect("send should succeed with mock in json mode");
+    assert_eq!(response.activation_type, "@CONTENTCLICKED");
+    assert_eq!(response.activation_value, None);
 }
 
 #[test]
 fn send_parses_plain_text_activation_type() {
-    // When alerter outputs a plain text activation type (e.g. "@CONTENTCLICKED"),
-    // AlerterResponse should parse it into the activation_type field
     let response = AlerterResponse::from_plain_text("@CONTENTCLICKED");
     assert_eq!(response.activation_type, "@CONTENTCLICKED");
     assert_eq!(response.activation_value, None);
@@ -19,7 +43,6 @@ fn send_parses_plain_text_activation_type() {
 
 #[test]
 fn send_parses_plain_text_action_clicked() {
-    // When the user clicks an action button, alerter outputs the action label
     let response = AlerterResponse::from_plain_text("OK");
     assert_eq!(response.activation_type, "OK");
 }
@@ -38,8 +61,6 @@ fn send_parses_plain_text_closed() {
 
 #[test]
 fn send_parses_json_output() {
-    // When json(true) is set, alerter outputs JSON like:
-    // {"activationType": "@CONTENTCLICKED", "activationValue": null}
     let json_str = r#"{"activationType": "@CONTENTCLICKED", "activationValue": null}"#;
     let response = AlerterResponse::from_json(json_str).expect("should parse valid JSON");
     assert_eq!(response.activation_type, "@CONTENTCLICKED");
@@ -48,7 +69,6 @@ fn send_parses_json_output() {
 
 #[test]
 fn send_parses_json_with_activation_value() {
-    // When the user types a reply, activationValue contains the reply text
     let json_str = r#"{"activationType": "@REPLIED", "activationValue": "hello back"}"#;
     let response = AlerterResponse::from_json(json_str).expect("should parse valid JSON");
     assert_eq!(response.activation_type, "@REPLIED");

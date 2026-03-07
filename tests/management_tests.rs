@@ -1,33 +1,52 @@
 use alerter_rs::{Alerter, AlerterError};
+use std::path::PathBuf;
+
+fn mock_alerter() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/mock_alerter.sh")
+}
 
 #[test]
 fn remove_invokes_with_remove_flag() {
-    // Alerter::remove(group_id) should invoke alerter with --remove <group_id>
-    // and return Result<(), AlerterError>
-    let result: Result<(), AlerterError> = Alerter::remove("my-group");
-    // We don't assert success — just that the types and method exist
-    let _ = result;
+    let result: Result<(), AlerterError> =
+        Alerter::remove_with_binary("my-group", Some(mock_alerter().as_path()));
+    assert!(result.is_ok());
 }
 
 #[test]
 fn list_invokes_with_list_flag() {
-    // Alerter::list(group_id) should invoke alerter with --list <group_id>
-    // and return Result<String, AlerterError>
-    let result: Result<String, AlerterError> = Alerter::list("my-group");
-    let _ = result;
+    let result: Result<String, AlerterError> =
+        Alerter::list_with_binary("my-group", Some(mock_alerter().as_path()));
+    assert!(result.is_ok());
+    assert!(result.unwrap().contains("my-group"));
 }
 
 #[test]
 fn list_all_notifications() {
-    // Alerter::list("ALL") should list all active notifications
-    let result: Result<String, AlerterError> = Alerter::list("ALL");
-    let _ = result;
+    let result: Result<String, AlerterError> =
+        Alerter::list_with_binary("ALL", Some(mock_alerter().as_path()));
+    assert!(result.is_ok());
+    assert!(result.unwrap().contains("ALL"));
 }
 
 #[test]
 fn remove_returns_error_for_nonexistent_group() {
-    // Removing a non-existent group should still succeed or return a meaningful error
-    let result = Alerter::remove("nonexistent-group-12345");
-    // Either it succeeds (no-op) or returns an error — but it should not panic
+    let result =
+        Alerter::remove_with_binary("nonexistent-group-12345", Some(mock_alerter().as_path()));
+    // Mock always succeeds; just verify it doesn't panic
     let _ = result;
+}
+
+#[test]
+fn remove_static_returns_correct_type() {
+    // Verify the static method signature compiles
+    fn _check_types() {
+        let _: Result<(), AlerterError> = Alerter::remove("any-group");
+    }
+}
+
+#[test]
+fn list_static_returns_correct_type() {
+    fn _check_types() {
+        let _: Result<String, AlerterError> = Alerter::list("any-group");
+    }
 }

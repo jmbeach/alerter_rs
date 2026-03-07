@@ -27,8 +27,11 @@ pub fn extract_binary() -> Result<PathBuf, std::io::Error> {
         return Ok(binary_path);
     }
 
-    fs::write(&binary_path, ALERTER_BINARY)?;
-    fs::set_permissions(&binary_path, fs::Permissions::from_mode(0o755))?;
+    // Write to a temp file then atomically rename to avoid race conditions
+    let tmp_path = cache_dir.join(format!("alerter-{hash}.tmp.{}", std::process::id()));
+    fs::write(&tmp_path, ALERTER_BINARY)?;
+    fs::set_permissions(&tmp_path, fs::Permissions::from_mode(0o755))?;
+    fs::rename(&tmp_path, &binary_path)?;
 
     Ok(binary_path)
 }
