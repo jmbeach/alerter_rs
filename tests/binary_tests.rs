@@ -1,4 +1,4 @@
-use alerter_rs::binary::{ALERTER_BINARY, extract_binary, get_binary_path};
+use alerter_rs::binary::{extract_binary, get_binary_path, ALERTER_BINARY};
 use std::os::unix::fs::PermissionsExt;
 
 #[test]

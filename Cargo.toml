@@ -1,7 +1,15 @@
 [package]
 name = "alerter_rs"
-version = "0.1.0"
-edition = "2024"
+version = "26.5.0"
+edition = "2021"
+description = "A library for sending macos desktop notifications in Rust (actually a thin wrapper around alerter)"
+license = "MIT"              # or "MIT OR Apache-2.0", etc.
+repository = "https://github.com/jmbeach/alerter_rs"  # optional but recommended
+homepage = "https://github.com/jmbeach/alerter_rs"
+readme = "README.md"
+keywords = ["macos", "notification", "desktop", "alert"]
+categories = ["os::macos-apis", "api-bindings"]
+
 
 [features]
 integration-tests = []

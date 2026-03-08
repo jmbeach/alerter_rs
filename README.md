@@ -8,7 +8,7 @@ The alerter binary is compiled from source at build time and embedded directly i
 
 - **macOS 13+**
 - **Swift toolchain** (included with Xcode Command Line Tools)
-- **Rust 2024 edition**
+- **Rust 1.56+** (2021 edition)
 
 ## Installation
 
@@ -16,7 +16,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-alerter_rs = { git = "https://github.com/jmbeach/alerter_rs.git" }
+alerter_rs = "26.5"
 ```
 
 ## Usage
