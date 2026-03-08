@@ -1,6 +1,6 @@
 ---
 id: ar-6m5u
-status: open
+status: closed
 deps: [ar-ukpf]
 links: []
 created: 2026-03-08T00:08:00Z

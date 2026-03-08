@@ -1,6 +1,6 @@
 ---
 id: ar-kv7u
-status: open
+status: closed
 deps: [ar-8a8g]
 links: []
 created: 2026-03-08T00:08:00Z

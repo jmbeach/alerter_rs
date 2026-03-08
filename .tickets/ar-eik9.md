@@ -1,6 +1,6 @@
 ---
 id: ar-eik9
-status: open
+status: closed
 deps: [ar-9c2j]
 links: []
 created: 2026-03-08T00:07:59Z
