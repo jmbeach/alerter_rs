@@ -1,8 +1,9 @@
 use crate::binary::extract_binary;
 use crate::error::AlerterError;
+use crate::handle::NotificationHandle;
 use crate::response::AlerterResponse;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 pub struct Alerter {
     message: String,
@@ -222,6 +223,20 @@ impl Alerter {
         }
 
         args
+    }
+
+    pub fn send_async(&self) -> Result<NotificationHandle, AlerterError> {
+        let binary = resolve_binary(self.binary_path.as_deref())?;
+        let args: Vec<String> = self.build_args();
+
+        let child = Command::new(&binary)
+            .args(&args)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|e| AlerterError::ProcessSpawn(e.to_string()))?;
+
+        Ok(NotificationHandle::new(child, self.json))
     }
 
     pub fn send(&self) -> Result<AlerterResponse, AlerterError> {

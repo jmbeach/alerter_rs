@@ -1,6 +1,6 @@
 # alerter_rs
 
-A Rust wrapper around [vjeantet/alerter](https://github.com/vjeantet/alerter) — send rich macOS user notifications from Rust with zero external dependencies at runtime.
+A Rust wrapper around [vjeantet/alerter](https://github.com/vjeantet/alerter) — send rich macOS user notifications from Rust without the user needing to install other programs in advance (and without having to create a bundled application).
 
 The alerter binary is compiled from source at build time and embedded directly into your Rust binary. Users of your application never need to install alerter separately.
 
@@ -89,6 +89,63 @@ Alerter::new("Update available")
     .send()?;
 ```
 
+### Non-blocking (async) notifications
+
+`send_async()` spawns the notification subprocess and returns immediately with a `NotificationHandle`, letting your program continue without waiting for user interaction.
+
+#### Fire and forget
+
+```rust
+use alerter_rs::Alerter;
+
+// Notification shows, handle is dropped, subprocess is killed
+Alerter::new("Build complete!")
+    .title("CI")
+    .send_async()?
+    .detach(); // detach so the notification persists after drop
+```
+
+#### Deferred wait
+
+```rust
+let handle = Alerter::new("Deploy to production?")
+    .actions(vec!["Yes", "No"])
+    .send_async()?;
+
+// ... do other work while notification is showing ...
+
+let response = handle.wait()?;
+println!("User chose: {}", response.activation_type);
+```
+
+#### Managing multiple concurrent notifications
+
+```rust
+let mut handles = vec![
+    Alerter::new("Task 1 complete").send_async()?,
+    Alerter::new("Task 2 complete").send_async()?,
+    Alerter::new("Task 3 complete").send_async()?,
+];
+
+// Poll and reap completed notifications
+while !handles.is_empty() {
+    handles.retain_mut(|h| {
+        match h.try_wait() {
+            Ok(Some(resp)) => {
+                println!("Got response: {}", resp.activation_type);
+                false // remove from list
+            }
+            Ok(None) => true, // still running, keep polling
+            Err(e) => {
+                eprintln!("Error: {e}");
+                false
+            }
+        }
+    });
+    std::thread::sleep(std::time::Duration::from_millis(100));
+}
+```
+
 ### Manage notifications
 
 ```rust
@@ -128,9 +185,20 @@ let all = Alerter::list("ALL")?;
 | `at(&str)` | Deliver at time (`"HH:mm"` or `"yyyy-MM-dd HH:mm"`) |
 | `ignore_dnd(bool)` | Send even if Do Not Disturb is on |
 | `binary_path(path)` | Override the bundled binary path (for testing) |
-| `send()` | Send the notification, returns `Result<AlerterResponse, AlerterError>` |
+| `send()` | Send the notification (blocking), returns `Result<AlerterResponse, AlerterError>` |
+| `send_async()` | Send the notification (non-blocking), returns `Result<NotificationHandle, AlerterError>` |
 | `remove(group_id)` | Remove notifications by group ID |
 | `list(group_id)` | List notifications by group ID (or `"ALL"`) |
+
+### `NotificationHandle`
+
+| Method | Description |
+|---|---|
+| `wait(self)` | Block until the notification exits, returns `Result<AlerterResponse, AlerterError>` |
+| `try_wait(&mut self)` | Poll without blocking, returns `Ok(None)` if still running |
+| `detach(self)` | Consume the handle and let the subprocess continue independently |
+
+Dropping a `NotificationHandle` without calling `detach()` kills the subprocess.
 
 ### `AlerterResponse`
 
