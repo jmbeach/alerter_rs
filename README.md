@@ -184,7 +184,6 @@ let all = Alerter::list("ALL")?;
 | `delay(u32)` | Deliver after N seconds |
 | `at(&str)` | Deliver at time (`"HH:mm"` or `"yyyy-MM-dd HH:mm"`) |
 | `ignore_dnd(bool)` | Send even if Do Not Disturb is on |
-| `binary_path(path)` | Override the bundled binary path (for testing) |
 | `send()` | Send the notification (blocking), returns `Result<AlerterResponse, AlerterError>` |
 | `send_async()` | Send the notification (non-blocking), returns `Result<NotificationHandle, AlerterError>` |
 | `remove(group_id)` | Remove notifications by group ID |
