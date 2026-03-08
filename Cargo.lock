@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "alerter_rs"
-version = "26.5.0"
+version = "26.5.1"
 dependencies = [
  "alerter_rs",
  "dirs",

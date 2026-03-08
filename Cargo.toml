@@ -1,6 +1,6 @@
 [package]
 name = "alerter_rs"
-version = "26.5.0"
+version = "26.5.1"
 edition = "2021"
 description = "A library for sending macos desktop notifications in Rust (actually a thin wrapper around alerter)"
 license = "MIT"              # or "MIT OR Apache-2.0", etc.
