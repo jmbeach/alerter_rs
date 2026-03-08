@@ -1,3 +1,5 @@
+#![cfg(feature = "integration-tests")]
+
 use std::process::Command;
 
 fn run_showcase(arg: &str) -> std::process::Output {

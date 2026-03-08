@@ -1,3 +1,5 @@
+#![cfg(feature = "integration-tests")]
+
 use std::fs;
 use std::path::Path;
 

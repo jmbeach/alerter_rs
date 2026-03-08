@@ -1,6 +1,6 @@
 ---
 id: ar-k5ub
-status: open
+status: closed
 deps: [ar-2tkz]
 links: []
 created: 2026-03-08T00:08:00Z

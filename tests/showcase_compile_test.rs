@@ -1,3 +1,5 @@
+#![cfg(feature = "integration-tests")]
+
 use std::process::Command;
 
 #[test]

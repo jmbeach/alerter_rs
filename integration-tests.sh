@@ -3,10 +3,6 @@ set -euo pipefail
 
 echo "Building showcase example..."
 cargo build --example showcase
-if [ $? -ne 0 ]; then
-    echo "Build failed!"
-    exit 1
-fi
 
 PASS=0
 FAIL=0
@@ -14,7 +10,7 @@ PIDS=()
 NAMES=()
 
 # Launch notification types concurrently
-for notification_type in banner sound badge list; do
+for notification_type in basic sound actions dropdown reply icon content-image subtitle group sender json close-label ignore-dnd remove; do
     ./target/debug/examples/showcase "$notification_type" &
     PIDS+=($!)
     NAMES+=("$notification_type")

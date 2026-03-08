@@ -1,6 +1,6 @@
 ---
 id: ar-vyfe
-status: open
+status: closed
 deps: [ar-xqxj]
 links: []
 created: 2026-03-08T00:08:00Z
