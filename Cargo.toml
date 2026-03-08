@@ -13,6 +13,10 @@ categories = ["os::macos-apis", "api-bindings"]
 
 [features]
 integration-tests = []
+test-utils = []
+
+[dev-dependencies]
+alerter_rs = { path = ".", features = ["test-utils"] }
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

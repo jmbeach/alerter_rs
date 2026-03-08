@@ -10,6 +10,26 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file_path=$(cat | jq -r '.file_path') && [[ \"$file_path\" == *.rs ]] && cargo fmt -- \"$file_path\" || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file_path=$(cat | jq -r '.file_path') && [[ \"$file_path\" == *.rs ]] && cargo fmt -- \"$file_path\" || true"
+          }
+        ]
+      }
     ]
   }
 }

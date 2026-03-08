@@ -71,6 +71,7 @@ impl Alerter {
         }
     }
 
+    #[cfg(any(test, feature = "test-utils"))]
     pub fn binary_path(&mut self, path: impl Into<PathBuf>) -> &mut Self {
         self.binary_path = Some(path.into());
         self

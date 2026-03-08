@@ -6,6 +6,7 @@ version = 4
 name = "alerter_rs"
 version = "26.5.0"
 dependencies = [
+ "alerter_rs",
  "dirs",
  "serde",
  "serde_json",
